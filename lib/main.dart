@@ -27,7 +27,7 @@ class HomePage extends StatelessWidget {
     
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'),
+        title: const Text('Home Page'),
       ),
       body: FutureBuilder(
         future: Firebase.initializeApp(
@@ -60,7 +60,6 @@ class VerifyEmailView extends StatefulWidget {
   @override
   State<VerifyEmailView> createState() => _VerifyEmailViewState();
 }
-
 class _VerifyEmailViewState extends State<VerifyEmailView> {
   @override
   Widget build(BuildContext context) {
