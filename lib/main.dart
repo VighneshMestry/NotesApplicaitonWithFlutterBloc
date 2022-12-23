@@ -1,9 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'dart:developer' as devtools show log;
 
 import 'package:learningdart/views/login_view.dart';
 import 'package:learningdart/views/register_view.dart';
+import 'package:learningdart/views/verify_email_view.dart';
 
 // import 'package:learningdart/views/login_view.dart';
 
@@ -31,11 +33,7 @@ class HomePage extends StatelessWidget {
     @override
   Widget build(BuildContext context) {
     
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home Page'),
-      ),
-      body: FutureBuilder(
+    return FutureBuilder(
         future: Firebase.initializeApp(
           options: DefaultFirebaseOptions.currentPlatform,
         ),
@@ -43,45 +41,93 @@ class HomePage extends StatelessWidget {
           switch(snapshot.connectionState){
             case ConnectionState.done:
               final user = FirebaseAuth.instance.currentUser;
+              if(user != null){
+                if(user.emailVerified){
+                  return const NotesView();
+                }else {
+                  return const VerifyEmailView();
+                }
+              }else{
+                return const LoginView();
+              }
               // if(user?.emailVerified ?? false){
               //   print('User is already registered');
               // }else {
               //   Navigator.of(context).push(MaterialPageRoute(builder: ((context) => const VerifyEmailView())));
               // }
-
-
-                return const LoginView();
               default: 
-                return const Text("Loading.....");
+                return const CircularProgressIndicator();
           }
         }, 
-      ), 
-    );
-  }
-}
-
-class VerifyEmailView extends StatefulWidget {
-  const VerifyEmailView({super.key});
-
-  @override
-  State<VerifyEmailView> createState() => _VerifyEmailViewState();
-}
-class _VerifyEmailViewState extends State<VerifyEmailView> {
-  @override
-  Widget build(BuildContext context) {
-    return Column(children: [
-        const Text('Please Verify your email address'),
-        TextButton(onPressed: () async {
-          final user = FirebaseAuth.instance.currentUser;
-          await user?.sendEmailVerification();
-        }, 
-        child: const Text('Send Email Verification'))
-      ]
       );
   }
 }
 
 
+class NotesView extends StatefulWidget {
+  const NotesView({super.key});
+
+  @override
+  State<NotesView> createState() => NotesViewState();
+}
+enum MenuAction{logout}
+class NotesViewState extends State<NotesView> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Main UI'),
+        actions: [
+          PopupMenuButton<MenuAction>(
+            onSelected: (value) async{
+              switch(value){
+                case MenuAction.logout:
+                  final showLogout = await showLogOutDialog(context);
+                  if(showLogout){
+                    await FirebaseAuth.instance.signOut();
+                    Navigator.of(context).pushNamedAndRemoveUntil('/login/', (_) => false);
+                  }
+              }
+            },
+          itemBuilder: (context) {
+            return const [
+              PopupMenuItem<MenuAction>(
+                value : MenuAction.logout,
+                child:  Text('My Accout'),
+              ),
+              PopupMenuItem<MenuAction>(
+                value : MenuAction.logout,
+                child:  Text('Log out'),
+              )
+            ];
+          },)
+        ],
+        ),
+      
+      
+    );
+  }
+}
+
+Future<bool> showLogOutDialog(BuildContext context){
+  return showDialog<bool>(
+    context: context, 
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('Sign Out'),
+        content: const Text('Are you sure you want to sign out?'),
+        actions: [
+          TextButton(onPressed: () {
+            Navigator.of(context).pop(false);
+          }, child: const Text('Cancel')),
+          TextButton(onPressed: () {
+            Navigator.of(context).pop(true);
+          }, child: const Text('Log Out')),
+        ],
+      );
+    },
+  ).then((value) => value ?? false);
+}
 
 // class MyApp extends StatelessWidget {
 //   const MyApp({super.key});

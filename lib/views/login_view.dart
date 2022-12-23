@@ -53,7 +53,7 @@ class _LoginViewState extends State<LoginView> {
                             await FirebaseAuth.instance.signInWithEmailAndPassword(
                               email: email, 
                               password: password);
-                        print(userCredential);
+                          print(userCredential);
                         } 
                         on FirebaseAuthException catch(e){
                           if(e.code == 'user-not-found') {print('User not found in the database');}
