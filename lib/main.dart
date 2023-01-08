@@ -13,7 +13,7 @@ import 'package:learningdart/views/verify_email_view.dart';
 import 'firebase_options.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized(); 
   runApp(MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
