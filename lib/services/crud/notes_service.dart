@@ -1,11 +1,24 @@
+import 'dart:async';
+
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' show join;
 import 'crud_exception.dart';
 
-
+ 
 class NotesService{
-  Database? _db;      // Underscore says that the function is private
+  Database? _db;  
+  
+  List<DatabaseNote> _notes = [];
+  final _notesStreamController =  StreamController<List<DatabaseNote>>.broadcast();
+  
+  Future<void> _cacheNotes() async {
+    final allNotes = await getAllNotes();
+    _notes = allNotes.toList();
+    _notesStreamController.add(_notes);
+  } 
+  
+  // Underscore says that the function is private
 
   Future<DatabaseNote> createNote({required DatabaseUser owner}) async {
     final db = _getDatabaseOrThrow();
@@ -20,6 +33,8 @@ class NotesService{
     });
 
     final note = DatabaseNote(id: noteId, userId: owner.id, text: text, isSyncedWithCloud: true);
+    _notes.add(note);
+    _notesStreamController.add(_notes);
     return note;
   }
 
@@ -28,11 +43,19 @@ class NotesService{
 
     final deleteCount = await db.delete(userTable, where: 'id = ?', whereArgs: [id]);
 
-    if(deleteCount != 1) throw CouldNotDeleteNote();
+    if(deleteCount != 1) {
+      throw CouldNotDeleteNote();
+    }
+    else{
+      _notes.removeWhere((note) => note.id == id);
+      _notesStreamController.add(_notes);
+    }
   }
 
   Future<int> deleteAllNotes () async {
     final db = _getDatabaseOrThrow();
+    _notes = [];
+    _notesStreamController.add(_notes);
     return await db.delete(noteTable);  // check for the where = null condition with the output.
   }
 
@@ -101,7 +124,7 @@ class NotesService{
       
       await db.execute(createUserTable);
       await db.execute(createNotesTable);
-
+      await _cacheNotes();
     } on MissingPlatformDirectoryException {
         throw UnableToGetDocumentDirectory();
     }
