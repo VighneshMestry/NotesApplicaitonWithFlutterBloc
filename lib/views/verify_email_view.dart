@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:learningdart/constants/routes.dart';
 import 'package:learningdart/services/auth/auth_service.dart';
@@ -19,7 +21,11 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
           const Text("If you haven't received a verificaction email yet, press the button below"),
           const Text('Please Verify your email address'),
           TextButton(onPressed: () async {
-            AuthService.firebase().sendEmailVerification();
+            // AuthService.firebase().sendEmailVerification();
+            final tempUser = FirebaseAuth.instance.currentUser;
+            if(tempUser!=null && !tempUser.emailVerified){
+            await tempUser.sendEmailVerification();
+            }
           }, 
           child: const Text('Send Email Verification')),
           TextButton(onPressed: () {
