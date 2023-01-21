@@ -4,6 +4,7 @@ import 'package:learningdart/services/auth/auth_service.dart';
 
 
 import 'package:learningdart/views/login_view.dart';
+import 'package:learningdart/views/notes/new_note_view.dart';
 import 'package:learningdart/views/notes_view.dart';
 import 'package:learningdart/views/register_view.dart';
 import 'package:learningdart/views/verify_email_view.dart';
@@ -25,6 +26,7 @@ void main() {
         registerRoute :(context) =>  const RegisterView(),
         notesRoute :(context) {return const NotesView();},
         verifyEmail :(context) => const VerifyEmailView(),
+        newNoteRoute:(context) => const NewNoteView(),
       },
     )
   );
