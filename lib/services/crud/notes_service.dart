@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
@@ -12,11 +13,20 @@ class NotesService{
   List<DatabaseNote> _notes = [];
 
   //Creating NotesService Singleton
-  NotesService._sharedInstance();
   static final NotesService _shared = NotesService._sharedInstance();
+  NotesService._sharedInstance() {
+    // 21:40:00
+    _notesStreamController = StreamController<List<DatabaseNote>>.broadcast(
+      onListen: () {
+        _notesStreamController.sink.add(_notes);
+      },
+    );
+  }
   factory NotesService() => _shared;
 
-  final _notesStreamController =  StreamController<List<DatabaseNote>>.broadcast();
+
+  // Broadcast here says that the information from streamcontroller can be shared to with only one listener at a time.
+  late final StreamController<List<DatabaseNote>> _notesStreamController;
   Stream<List<DatabaseNote>> get allNotes => _notesStreamController.stream;
   
 Future<DatabaseUser> getOrCreateUser ({required String email}) async {
@@ -43,6 +53,8 @@ Future<DatabaseUser> getOrCreateUser ({required String email}) async {
   Future<DatabaseNote> createNote({required DatabaseUser owner}) async {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
+
+    //make sure owner exists in the database with the correct id.
     final dbUser = await getUser(email : owner.email);
 
     if(dbUser != owner){
@@ -65,7 +77,7 @@ Future<DatabaseUser> getOrCreateUser ({required String email}) async {
 
     final deleteCount = await db.delete(userTable, where: 'id = ?', whereArgs: [id]);
 
-    if(deleteCount != 1) {
+    if(deleteCount == 0) { 
       throw CouldNotDeleteNote();
     }
     else{
@@ -77,9 +89,10 @@ Future<DatabaseUser> getOrCreateUser ({required String email}) async {
   Future<int> deleteAllNotes () async {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
+    final numberOfDeletion = await db.delete(noteTable);
     _notes = [];
     _notesStreamController.add(_notes);
-    return await db.delete(noteTable);  // check for the where = null condition with the output.
+    return numberOfDeletion;          // check for the where = null condition with the output.
   }
 
   Future<DatabaseNote> getNote ({required int id}) async {
@@ -88,13 +101,15 @@ Future<DatabaseUser> getOrCreateUser ({required String email}) async {
 
     final notes = await db.query(noteTable, limit: 1, where: 'id = ?', whereArgs: [id]);
 
-    if(notes.isEmpty) throw CouldNotFindNote();
-
-    final note =  DatabaseNote.fromRow(notes.first);
-    _notes.removeWhere((note) => note.id == id);
-    _notes.add(note);
-    _notesStreamController.add(_notes);
-    return note; 
+    if(notes.isEmpty) {
+      throw CouldNotFindNote();
+    }else{
+      final note =  DatabaseNote.fromRow(notes.first);
+      _notes.removeWhere((note) => note.id == id);
+      _notes.add(note);
+      _notesStreamController.add(_notes);
+      return note; 
+    }
   }
 
   Future<Iterable<DatabaseNote>> getAllNotes () async {
@@ -111,6 +126,7 @@ Future<DatabaseUser> getOrCreateUser ({required String email}) async {
     // make sure if the note exists.
     await getNote(id : note.id);
 
+    //update DB
     final updateCount = await db.update(noteTable, {
       textColumn : text,
       isSyncedWithCloudColumn : 0,
@@ -121,8 +137,10 @@ Future<DatabaseUser> getOrCreateUser ({required String email}) async {
     }
     else {
       final updatedNote =  await getNote(id : note.id);
+      log('updates Note');
+      print(updatedNote);
       _notes.removeWhere((note) => note.id == updatedNote.id);
-      _notes.add(note);
+      _notes.add(updatedNote);
       _notesStreamController.add(_notes);
       return updatedNote;
     }

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:learningdart/services/auth/auth_service.dart';
 import 'package:learningdart/services/crud/notes_service.dart';
@@ -19,12 +21,6 @@ class NotesViewState extends State<NotesView> {
   @override
   void initState() {
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    _notesService.close();
-    super.dispose();
   }
 
   String get userEmail => AuthService.firebase().currentUser!.email!;
@@ -64,7 +60,8 @@ class NotesViewState extends State<NotesView> {
           },)
         ],
         ),
-        body: FutureBuilder(future: _notesService.getOrCreateUser(email: userEmail),
+        body: FutureBuilder(
+          future: _notesService.getOrCreateUser(email: userEmail),
           builder: (context, snapshot) {
             switch(snapshot.connectionState){
               case ConnectionState.done:
@@ -74,9 +71,28 @@ class NotesViewState extends State<NotesView> {
                   builder:(context, snapshot) {
                     switch(snapshot.connectionState){
                       case ConnectionState.waiting:
-                        return const Text('Waiting for all notes...');
+                      case ConnectionState.active:
+                        if(snapshot.hasData){
+                          final allNotes = snapshot.data as List<DatabaseNote>;
+                          return ListView.builder(
+                            itemCount: allNotes.length,
+                            itemBuilder:(context, index) {
+                              final note = allNotes[index];
+                              return ListTile(
+                                title: Text(
+                                  note.text,
+                                  maxLines: 1,
+                                  softWrap: true,
+                                  overflow: TextOverflow.ellipsis,
+                                  ),
+                              );
+                            },
+                          );
+                        }else{
+                          return const CircularProgressIndicator();
+                        }
                       default:
-                      return const CircularProgressIndicator();
+                        return const CircularProgressIndicator();
                     }
                   },
                 );
@@ -108,3 +124,25 @@ Future<bool> showLogOutDialog(BuildContext context){
     },
   ).then((value) => value ?? false);
 }
+
+
+// if(snapshot.hasData){
+//                           final allNotes = snapshot.data as List<DatabaseNote>;
+//                           return ListView.builder(
+//                             itemCount: allNotes.length,
+//                             itemBuilder: (context, index) {
+//                               final note = allNotes[index];
+//                               return ListTile(
+//                                 title: Text(
+//                                   note.text,
+//                                   maxLines: 1,
+//                                   softWrap: true,
+//                                   overflow: TextOverflow.ellipsis,
+//                                   ),
+//                               );
+//                             },
+//                           );
+//                         }else{
+//                           log('else loading');
+//                           return const CircularProgressIndicator();
+//                         }
