@@ -87,6 +87,8 @@ class _NewNoteViewState extends State<NewNoteView> {
             case ConnectionState.done:            
             _note = snapshot.data;
             _setupTextControllerListener();
+            print("Text : "+ _textController.text);
+
 
             //Take input from user
               return TextField(
@@ -101,6 +103,7 @@ class _NewNoteViewState extends State<NewNoteView> {
               return const CircularProgressIndicator();
           }
         },
+        
       ),
     );
   }
