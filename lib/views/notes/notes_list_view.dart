@@ -5,14 +5,15 @@ import '../../utilities/dialogs/delete_dialog.dart';
 
 /* Typedef in Dart is used to create a user-defined identity (alias) for a function, 
    and we can use that identity in place of the function in the program code. */
-typedef DeleteNoteCallBack = Function(DatabaseNote note);
+typedef NoteCallBack = Function(DatabaseNote note);
 
 class NotesListView extends StatelessWidget {
   // In this class allNotes is written as notes
   final List<DatabaseNote> notes;
-  final DeleteNoteCallBack oneDeleteNote;
+  final NoteCallBack onDeleteNote;
+  final NoteCallBack onTap;
 
-  const NotesListView({super.key, required this.notes, required this.oneDeleteNote});
+  const NotesListView({Key? key, required this.notes, required this.onDeleteNote, required this.onTap,}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +22,9 @@ class NotesListView extends StatelessWidget {
           itemBuilder:(context, index) {
             final note = notes[index];
             return ListTile(
+              onTap: () {
+                onTap(note);
+              },
               title: Text(
                 note.text,
                 maxLines: 1,
@@ -32,7 +36,7 @@ class NotesListView extends StatelessWidget {
                 onPressed: () async {
                   final shouldDelete = await showDeleteDialog(context);
                   if(shouldDelete){
-                    oneDeleteNote(note);
+                    onDeleteNote(note);
                   }
                 },
                 icon: const Icon(Icons.delete),

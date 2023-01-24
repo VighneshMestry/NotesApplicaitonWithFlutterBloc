@@ -1,24 +1,30 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:learningdart/services/auth/auth_service.dart';
+import 'package:learningdart/utilities/generics/get_arguments.dart';
 import '../../services/crud/notes_service.dart';
 
-class NewNoteView extends StatefulWidget {
-  const NewNoteView({super.key});
+class CreateOrUpdateNoteView extends StatefulWidget {
+  const CreateOrUpdateNoteView({super.key});
 
   @override
-  State<NewNoteView> createState() => _NewNoteViewState();
+  State<CreateOrUpdateNoteView> createState() => _CreateOrUpdateNoteViewState();
 }
 
-class _NewNoteViewState extends State<NewNoteView> {
+class _CreateOrUpdateNoteViewState extends State<CreateOrUpdateNoteView> {
 
   DatabaseNote? _note;
   late final NotesService _notesService;
   late final TextEditingController _textController;
 
-  Future<DatabaseNote> createNewNote() async {
+  Future<DatabaseNote> createOrGetExistingNote(BuildContext context) async {
+
+    final widgetNote = context.getArgument<DatabaseNote>();
+    if(widgetNote != null){
+      _note = widgetNote;
+      _textController.text = widgetNote.text;
+      return widgetNote;
+    }
+
     final exisitingNote = _note;
     if(exisitingNote != null) {
       return exisitingNote;
@@ -27,7 +33,9 @@ class _NewNoteViewState extends State<NewNoteView> {
     final currentUser = AuthService.firebase().currentUser!;
     final email = currentUser.email!;
     final owner = await _notesService.getUser(email: email);
-    return await _notesService.createNote(owner : owner);
+    final newNote =  await _notesService.createNote(owner : owner);
+    _note = newNote;
+    return newNote;
   }
 
   void _deleteNoteIfTextIsEmpty() {
@@ -81,24 +89,20 @@ class _NewNoteViewState extends State<NewNoteView> {
     return Scaffold(
       appBar: AppBar(title : const Text('New Note')),
       body: FutureBuilder(
-        future: createNewNote(),
+        future: createOrGetExistingNote(context),
         builder: (context, snapshot) {
           switch(snapshot.connectionState){ 
-            case ConnectionState.done:            
-            _note = snapshot.data;
-            _setupTextControllerListener();
-            print("Text : "+ _textController.text);
-
-
-            //Take input from user
-              return TextField(
-                controller: _textController,
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                decoration: const InputDecoration(
-                  hintText : 'Start typing your note...',
-                ), 
-              );
+            case ConnectionState.done:
+              _setupTextControllerListener();
+              //Take input from user
+                return TextField(
+                  controller: _textController,
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  decoration: const InputDecoration(
+                    hintText : 'Start typing your note...',
+                  ), 
+                );
             default:
               return const CircularProgressIndicator();
           }
