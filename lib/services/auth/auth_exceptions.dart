@@ -12,6 +12,8 @@ class GenericAuthException implements Exception{}
 
 class UserNotLoggedInAuthException implements Exception{}
 
+class UserShouldBeSetBeforeReadingAllNotes implements Exception {}
+
 
 
 
