@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:learningdart/services/cloud/cloud_note.dart';
+import 'package:learningdart/services/cloud/cloud_storage_exceptions.dart';
 
 import '../../services/crud/notes_service.dart';
 import '../../utilities/dialogs/delete_dialog.dart';
 
 /* Typedef in Dart is used to create a user-defined identity (alias) for a function, 
    and we can use that identity in place of the function in the program code. */
-typedef NoteCallBack = Function(DatabaseNote note);
+typedef NoteCallBack = Function(CloudNote note);
 
 class NotesListView extends StatelessWidget {
   // In this class allNotes is written as notes
-  final List<DatabaseNote> notes;
+  final Iterable<CloudNote> notes;
   final NoteCallBack onDeleteNote;
   final NoteCallBack onTap;
 
@@ -20,7 +22,7 @@ class NotesListView extends StatelessWidget {
     return ListView.builder(
           itemCount: notes.length,
           itemBuilder:(context, index) {
-            final note = notes[index];
+            final note = notes.elementAt(index);
             return ListTile(
               onTap: () {
                 onTap(note);
