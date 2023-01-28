@@ -31,7 +31,7 @@ class _CreateOrUpdateNoteViewState extends State<CreateOrUpdateNoteView> {
     }
     // Here while entering into the notes view a same user must be created like the Authservice while registering so that the data is stored under the same user.
     final currentUser = AuthService.firebase().currentUser!;
-    final email = currentUser.email!;
+    final email = currentUser.email;
     final owner = await _notesService.getUser(email: email);
     final newNote =  await _notesService.createNote(owner : owner);
     _note = newNote;
