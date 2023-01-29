@@ -3,8 +3,7 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/**",
-                "generated_plugin_registrant.h/**"
+                "${workspaceFolder}/**"
             ],
             "defines": [
                 "_DEBUG",

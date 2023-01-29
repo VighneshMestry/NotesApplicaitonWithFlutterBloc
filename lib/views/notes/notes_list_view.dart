@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:learningdart/services/cloud/cloud_note.dart';
-import 'package:learningdart/services/cloud/cloud_storage_exceptions.dart';
 
-import '../../services/crud/notes_service.dart';
 import '../../utilities/dialogs/delete_dialog.dart';
 
 /* Typedef in Dart is used to create a user-defined identity (alias) for a function, 
