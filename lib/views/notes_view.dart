@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:learningdart/services/auth/auth_service.dart';
+import 'package:learningdart/services/auth/bloc/auth_event.dart';
 import 'package:learningdart/services/cloud/cloud_note.dart';
 import 'package:learningdart/services/cloud/firebase_cloud_storage.dart';
 import 'package:learningdart/services/crud/notes_service.dart';
@@ -7,6 +9,7 @@ import 'package:learningdart/views/notes/notes_list_view.dart';
 
 import '../enum/menu_action.dart';
 import '../constants/routes.dart';
+import '../services/auth/bloc/auth_bloc.dart';
 import '../utilities/dialogs/log_out.dart';
 
 class NotesView extends StatefulWidget {
@@ -38,13 +41,14 @@ class NotesViewState extends State<NotesView> {
             }, icon: const Icon(Icons.add)
           ),
           PopupMenuButton<MenuAction>(
-            onSelected: (value) async{
+            onSelected: (value) async {
               switch(value){
                 case MenuAction.logout:
                   final showLogout = await showLogOutDialog(context);
                   if(showLogout){
-                    await AuthService.firebase().logOut();
-                    Navigator.of(context).pushNamedAndRemoveUntil(loginRoute, (_) => false);
+                    // ignore: use_build_context_synchronously
+                    context.read<AuthBloc>().add(const AuthEventLogOut(),);
+                    // Navigator.of(context).pushNamedAndRemoveUntil(loginRoute, (_) => false);
                   }
               }
             },

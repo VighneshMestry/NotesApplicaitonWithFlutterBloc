@@ -3,6 +3,7 @@ import 'package:learningdart/services/auth/auth_provider.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 // The latest update of our application is that now the authBloc will be responsible for all the authentication in the application
+// AuthBLoc will be responsible for initializing the firebase authentication and all the logout and login functions.
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   //Here the authbloc will require a provider to function but 
   //the super constructor when called doesnot accept a provider istead it accepts a state 

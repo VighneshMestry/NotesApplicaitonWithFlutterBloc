@@ -1,64 +1,95 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:learningdart/constants/routes.dart';
 import 'package:learningdart/services/auth/auth_service.dart';
-
+import 'package:learningdart/services/auth/bloc/auth_bloc.dart';
+import 'package:learningdart/services/auth/bloc/auth_event.dart';
+import 'package:learningdart/services/auth/bloc/auth_state.dart';
+import 'package:learningdart/services/auth/firebase_auth_provider.dart';
 
 import 'package:learningdart/views/login_view.dart';
 import 'package:learningdart/views/notes/create_update_note_view.dart';
 import 'package:learningdart/views/notes_view.dart';
 import 'package:learningdart/views/register_view.dart';
 import 'package:learningdart/views/verify_email_view.dart';
+// A main function doesnot get called during a hot reload for that hot restart is mandatory.
 
+// For example in this case the BlocProvider is made along with AuthBloc 
+//but it is in the main fucntion and if that is not running than the futher code will also not run 
+//(In the case of hot reload).
 void main() {
-  WidgetsFlutterBinding.ensureInitialized(); 
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const HomePage(),
-      routes: {
-        loginRoute :(context) =>  const LoginView(),
-        registerRoute :(context) =>  const RegisterView(),
-        notesRoute :(context) {return const NotesView();},
-        verifyEmail :(context) => const VerifyEmailView(),
-        createOrUpdateNoteRoute:(context) => const CreateOrUpdateNoteView(),
+    title: 'Flutter Demo',
+    theme: ThemeData(
+      primarySwatch: Colors.blue,
+    ),
+    home: BlocProvider<AuthBloc>(
+      // In this case when we call BlocProvider the BlocProvider is going to inject the authBloc 
+      //into the 'context' and then we will be able to access the AuthBloc anywhere 
+      //swith the help of the context
+      create: (context) => AuthBloc(FirebaseAuthProvider()),
+      child: const HomePage(),
+    ),
+    routes: {
+      loginRoute: (context) => const LoginView(),
+      registerRoute: (context) => const RegisterView(),
+      notesRoute: (context) {
+        return const NotesView();
       },
-    )
-  );
+      verifyEmail: (context) => const VerifyEmailView(),
+      createOrUpdateNoteRoute: (context) => const CreateOrUpdateNoteView(),
+    },
+  ));
 }
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-    @override
+  @override
   Widget build(BuildContext context) {
-    
-    return FutureBuilder(
-        future: AuthService.firebase().initialize(),
-        builder: (context, snapshot) {
-          switch(snapshot.connectionState){
-            case ConnectionState.done:
-              final user = AuthService.firebase().currentUser;
-              if(user != null){
-                if(user.isEmailVerified){
-                  return const NotesView();
-                }else {
-                  return const VerifyEmailView();
-                }
-              }else{
-                return const LoginView();
-              }
-              // if(user?.emailVerified ?? false){
-              //   print('User is already registered');
-              // }else {
-              //   Navigator.of(context).push(MaterialPageRoute(builder: ((context) => const VerifyEmailView())));
-              // }
-              default: 
-                return const CircularProgressIndicator();
-          }
-        }, 
-      );
+    // Add is the way to contact with bloc is we send messages with the help of the 'add' function
+    // So add is the way of communication with the Bloc or Blocs
+    context.read<AuthBloc>().add(const AuthEventInitialize());
+    return BlocBuilder<AuthBloc, AuthState>(builder: ((context, state) {
+      if(state is AuthStateLoggedIn){
+        return const NotesView();
+      } else if (state is AuthStateNeedsVerification){
+        return const VerifyEmailView();
+      } else if (state is AuthStateLoggedOut){
+        return const LoginView();
+      } else {
+        return const Scaffold(
+          body: CircularProgressIndicator(),
+        );
+      }
+    }));
+
+    // return FutureBuilder(
+    //   future: AuthService.firebase().initialize(),
+    //   builder: (context, snapshot) {
+    //     switch (snapshot.connectionState) {
+    //       case ConnectionState.done:
+    //         final user = AuthService.firebase().currentUser;
+    //         if (user != null) {
+    //           if (user.isEmailVerified) {
+    //             return const NotesView();
+    //           } else {
+    //             return const VerifyEmailView();
+    //           }
+    //         } else {
+    //           return const LoginView();
+    //         }
+    //       // if(user?.emailVerified ?? false){
+    //       //   print('User is already registered');
+    //       // }else {
+    //       //   Navigator.of(context).push(MaterialPageRoute(builder: ((context) => const VerifyEmailView())));
+    //       // }
+    //       default:
+    //         return const CircularProgressIndicator();
+    //     }
+    //   },
+    // );
   }
 }
 
