@@ -91,7 +91,6 @@ class FirebaseAuthProvider implements AuthProvider{
 
   @override
   Future<void> sendEmailVerification() {
-    // TODO: implement sendEmailVerification
     throw UnimplementedError();
   }
   
