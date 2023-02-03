@@ -19,7 +19,11 @@ class LoginView extends StatefulWidget {
 class _LoginViewState extends State<LoginView> {
   late final TextEditingController _email;
   late final TextEditingController _password;
-  late final CloseDialog? _closeDialogHandle;
+
+  // A temporary loadingDialog was made with was having a fucntion CloseDialog but after that a dedicated loadingScreen was made 
+  // That's why the existing temporary loadingDialog was removed.
+  // file name : loading_dialog.dart
+  // late final CloseDialog? _closeDialogHandle;
 
   @override
   void initState() {
@@ -43,16 +47,18 @@ class _LoginViewState extends State<LoginView> {
         //As the Bloc works in form of states and events the state has been readed and the exception stored 
         //in the state is called and checked if the exception is already handled or not.
         if (state is AuthStateLoggedOut) {
-          final closeDialog = _closeDialogHandle;
-          if(!state.isLoading && closeDialog != null){
-            closeDialog();
-            _closeDialogHandle = null;
-          } else if(state.isLoading && closeDialog == null){
-            _closeDialogHandle = showLoadingDialog(
-              context: context,
-              text: 'Loading...',
-            );
-          }
+
+          // The code relate to the temporary loadingDialog. 
+          // final closeDialog = _closeDialogHandle;
+          // if(!state.isLoading && closeDialog != null){
+          //   closeDialog();
+          //   _closeDialogHandle = null;
+          // } else if(state.isLoading && closeDialog == null){
+          //   _closeDialogHandle = showLoadingDialog(
+          //     context: context,
+          //     text: 'Loading...',
+          //   );
+          // }
           if (state.exception is UserNotFoundAuthException) {
             await showErrorDialog(context, 'User Not Found');
           } else if (state.exception is WrongPasswordAuthException) {

@@ -12,6 +12,8 @@ import 'package:learningdart/views/notes/create_update_note_view.dart';
 import 'package:learningdart/views/notes_view.dart';
 import 'package:learningdart/views/register_view.dart';
 import 'package:learningdart/views/verify_email_view.dart';
+
+import 'helpers/loading/loading_screen.dart';
 // A main function doesnot get called during a hot reload for that hot restart is mandatory.
 
 // For example in this case the BlocProvider is made along with AuthBloc 
@@ -49,7 +51,15 @@ class HomePage extends StatelessWidget {
     // Add is the way to contact with bloc is we send messages with the help of the 'add' function
     // So add is the way of communication with the Bloc or Blocs
     context.read<AuthBloc>().add(const AuthEventInitialize());
-    return BlocBuilder<AuthBloc, AuthState>(builder: ((context, state) {
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if(state.isLoading){
+          LoadingScreen().show(context: context, text: state.loadingText ?? 'Please wait for moment');
+        } else{
+          LoadingScreen().hide();
+        }
+      },
+      builder: ((context, state) {
       if(state is AuthStateLoggedIn){
         return const NotesView();
       } else if (state is AuthStateNeedsVerification){
