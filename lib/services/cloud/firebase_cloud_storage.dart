@@ -23,32 +23,36 @@ class FirebaseCloudStorage {
   }
 
   Stream<Iterable<CloudNote>> allNotes ({required String ownerUserId}) {
-    return notes.snapshots().map((event) => event.docs
-      .map((doc) => CloudNote.fromsnapshot(doc))
-      .where((note) => note.ownerUserId == ownerUserId)
-    );
+    final allNotes = notes
+      .where(ownerUserIdFieldName, isEqualTo:ownerUserId)
+      .snapshots()
+      .map((event) => event.docs
+        .map((doc) => CloudNote.fromsnapshot(doc)));
+    return allNotes;
   }
 
-  Future<Iterable<CloudNote>> getNotes ({required String ownerUserId}) async {
-    try {
-      return await notes
-      .where(ownerUserIdFieldName, isEqualTo: ownerUserId)
-      .get()
-      .then((value) => value.docs.map(
-        (doc) => CloudNote.fromsnapshot(doc),
-        // {
-        //   return CloudNote(
-        //     documentId: doc.id, 
-        //     ownerUserId: doc.data()[ownerUserIdFieldName] as String, 
-        //     text: doc.data()[textFieldName] as String
-        //     );
-        //   }, 
-        ),
-      );
-    } catch (e) {
-      throw CouldNotGetAllNotesException();
-    }
-  }
+  // Future<Iterable<CloudNote>> getNotes ({required String ownerUserId}) async {
+  //   try {
+  //     return await notes
+  //     .where(ownerUserIdFieldName, isEqualTo: ownerUserId)
+  //     .get()
+  //     .then((value) => value.docs.map(
+  //       (doc) => CloudNote.fromsnapshot(doc),
+
+  //       // {
+  //       //   return CloudNote(
+  //       //     documentId: doc.id, 
+  //       //     ownerUserId: doc.data()[ownerUserIdFieldName] as String, 
+  //       //     text: doc.data()[textFieldName] as String
+  //       //     );
+  //       //   },
+         
+  //       ),
+  //     );
+  //   } catch (e) {
+  //     throw CouldNotGetAllNotesException();
+  //   }
+  // }
 
   Future<CloudNote> createNewNote ({required String ownerUserId}) async {
     // Here only the reference is stored inside the documentNote hover over it to read documentation.
