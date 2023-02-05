@@ -28,6 +28,12 @@ class AuthStateNeedsVerification extends AuthState {
   const AuthStateNeedsVerification({required isLoading}) : super(isLoading : isLoading);
 }
 
+class AuthStateForgotPassword extends AuthState{
+  final Exception? exception;
+  final bool hasSentEmail;
+  const AuthStateForgotPassword({required this.exception, required this.hasSentEmail, required isLoading}) : super(isLoading : isLoading);
+}
+
 class AuthStateLoggedOut extends AuthState with EquatableMixin{
   final Exception? exception;
   const AuthStateLoggedOut({required this.exception, required isLoading, String? loadingText}) : super(isLoading : isLoading, loadingText: loadingText);

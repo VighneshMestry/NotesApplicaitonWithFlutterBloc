@@ -2,6 +2,8 @@ import 'package:learningdart/services/auth/auth_user.dart';
 import 'package:learningdart/services/auth/auth_provider.dart';
 import 'package:learningdart/services/auth/firebase_auth_provider.dart';
 
+//In this service all the function are in the form of arrow function because all these functions delegate their tasks/fucntionalities to the AuthProvider.s
+
 class AuthService implements AuthProvider{
   final AuthProvider provider;
   const AuthService(this.provider);
@@ -31,6 +33,9 @@ class AuthService implements AuthProvider{
   
   @override
   Future<void> initialize() => provider.initialize();
+  
+  @override
+  Future<void> sendPasswordReset({required String toEmail}) => provider.sendPasswordReset(toEmail: toEmail);
 
 }
 
