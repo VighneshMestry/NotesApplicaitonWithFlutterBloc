@@ -29,7 +29,7 @@ void main() {
     home: BlocProvider<AuthBloc>(
       // In this case when we call BlocProvider the BlocProvider is going to inject the authBloc 
       //into the 'context' and then we will be able to access the AuthBloc anywhere 
-      //swith the help of the context
+      //with the help of the context
       create: (context) => AuthBloc(FirebaseAuthProvider()),
       child: const HomePage(),
     ),
