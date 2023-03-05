@@ -1,5 +1,4 @@
 import 'package:bloc/bloc.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:learningdart/services/auth/auth_provider.dart';
 import 'auth_event.dart';
@@ -8,7 +7,7 @@ import 'auth_state.dart';
 // AuthBLoc will be responsible for initializing the firebase authentication and all the logout and login functions.
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   //Here the authbloc will require a provider to function but 
-  //the super constructor when called doesnot accept a provider istead it accepts a state 
+  //the super constructor when called doesnot accept a provider instead it accepts a state 
   //so that's why a super keyword is used with a 'state' as an argument.
   AuthBloc(AuthProvider provider) : super(const AuthStateUnInitialize(isLoading: true)){
 
